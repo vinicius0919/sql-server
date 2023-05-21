@@ -1,0 +1,3 @@
+# Ignore a file with the specified name.
+# Scoped to the 'logs' subfolder.
+/api/node_modules
