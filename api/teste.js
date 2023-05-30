@@ -1,6 +1,6 @@
 
 function inverterData(data) {
-    let newData = data.slice(0,10).split("-")
+    let newData = data.slice(0,10).split("/")
 
     let element = ""
 
@@ -12,4 +12,12 @@ function inverterData(data) {
     return element
 }
 
-inverterData("2002-09-25T03:00:00.000Z")
+function dados(dd){
+
+    const p = Object.values(dd)
+    console.log(p[1]);
+    
+}
+
+dados({ email: 'email', senha: '0000' })
+//inverterData("25/09/2002")

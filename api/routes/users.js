@@ -1,16 +1,26 @@
-import express from "express";
-import {addUser, deleteUser, getUser, getUsers, updateUser} from "../controllers/user.js"
+const f = require('../functions/functions')
+const express = require ("express")
+const control = require("../controllers/user");
 
 const router = express.Router();
 
-router.get("/getusers", getUsers);
+const getUser = router.get("/getuser", f.autenticarTokens, control.getUser);
 
-router.get("/getuser", getUser);
+const addUser = router.post("/add",  f.autenticarTokens, control.addUser)
 
-router.post("/addusers", addUser);
+const refresh = router.post("/token", control.refresh)
 
-router.put("/putusers", updateUser);
+const getUsers = router.get("/getusers", f.autenticarTokens, control.getUsers);
 
-router.delete("/deleteusers", deleteUser);
+const login = router.post("/login", control.login);
 
-export default router;
+const updateUser =router.put("/putusers", control.updateUser);
+
+const deleteUser = router.delete("/deleteusers", control.deleteUser);
+
+
+const logout = router.delete("/logout", control.logout)
+
+
+
+module.exports = {getUser, addUser, getUsers, updateUser, deleteUser, login, logout, refresh}

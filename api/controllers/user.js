@@ -1,6 +1,11 @@
-import { db } from "../db.js"
+const db = require ("../db");
+const f = require('../functions/functions')
+require('dotenv').config()
+const jwt = require('jsonwebtoken')
 
-export const getUsers = (_, res) =>{
+let refreshTokens = []
+
+const getUsers = (req, res) =>{
     const q = "SELECT CPF, pNome, sNome, Endereco, Email, DATE_FORMAT(dataNascimento,'%d/%m/%Y') as dataNascimento FROM sistema.paciente;"
 
     db.query(q, (err, data) => {
@@ -10,7 +15,7 @@ export const getUsers = (_, res) =>{
     });
 };
 
-export const getUser = (req, res) =>{
+const getUser = (req, res) =>{
     const cpf = req.body.CPF;
     const q = `SELECT CPF, pNome, sNome, Endereco, Email, DATE_FORMAT(dataNascimento,'%d/%m/%Y') as dataNascimento FROM sistema.paciente where CPF = '${cpf}';`
 
@@ -21,7 +26,42 @@ export const getUser = (req, res) =>{
     });
 };
 
-export const addUser = (req, res) =>{
+const login = async (req, res) => {
+    
+    console.log(req.body)
+    //const dados = req.body.dados
+
+    const q = `SELECT pnome, snome, image FROM sistema.funcionario where email = '${req.body.email}' and senha = '${req.body.senha}';`
+    
+    try {
+        await db.query(q, (err, data) => {
+            if (err) return res.send('Usuário ou senha inválidos' + err) ;
+            const user = {user: req.body.email};
+            const accessToken = f.generateAccessTokens(user)
+            res.json({accessToken: accessToken, pnome: data[0]['pnome'], snome: data[0]['snome'], imageRef: data[0]['image']})
+        });
+    } catch{
+        res.send("Deu erro!")
+    }
+};
+
+const logout = (req, res) =>{
+    refreshTokens = refreshTokens.filter(token => token !== req.body.token)
+    res.sendStatus(204)
+};
+
+const refresh = (req, res) =>{
+    const refreshToken = req.body.token
+    if (refreshToken==null) return res.sendStatus(401)
+    if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user)=>{
+       if(err) return res.sendStatus(403)
+       const accessToken = f.generateAccessTokens({user: user.user})
+       console.log("/token: ", user.user)
+       res.json({accessToken: accessToken})
+    });
+};
+ const addUser = (req, res) =>{
     console.log(req.body)
     const q = "insert into Paciente(CPF, pNome, sNome, dataNascimento, Endereco, Email, Telefone) values (?)";
 
@@ -41,7 +81,7 @@ export const addUser = (req, res) =>{
     });
 };
 
-export const updateUser = (req, res) =>{
+const updateUser = (req, res) =>{
     console.log(req.body)
     const pnome = req.body.pNome;
     const snome = req.body.sNome;
@@ -60,7 +100,7 @@ export const updateUser = (req, res) =>{
     });
 };
 
-export const deleteUser = (req, res) =>{
+ const deleteUser = (req, res) =>{
     console.log(req.body)
     const cpf = req.body.CPF;
     const q = `delete from Paciente where cpf = '${cpf}'`;
@@ -71,3 +111,6 @@ export const deleteUser = (req, res) =>{
         return res.status(200).json("Usuário deletado com sucesso");
     });
 };
+
+
+module.exports = {getUser, getUsers, addUser, deleteUser, updateUser, login, logout, refresh}

@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
-    "start": "nodemon index.js"
+    "devstart": "nodemon index.js",
+    "devstart2": "nodemon index2.js"
   },
   "keywords": [],
   "author": "",
