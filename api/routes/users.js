@@ -18,9 +18,10 @@ const updateUser =router.put("/putusers", control.updateUser);
 
 const deleteUser = router.delete("/deleteusers", control.deleteUser);
 
+const autenticarTokens = router.get("/autenticar", control.autenticar)
 
 const logout = router.delete("/logout", control.logout)
 
+const vagas = router.get("/vagas", control.showAllVacancies)
 
-
-module.exports = {getUser, addUser, getUsers, updateUser, deleteUser, login, logout, refresh}
+module.exports = {getUser, addUser, getUsers, updateUser, deleteUser, login, logout, refresh, autenticarTokens, vagas}

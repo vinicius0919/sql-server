@@ -1,6 +1,5 @@
 const rotas = require('./routes/users');
 
-
 const express = require("express");
 const cors = require("cors");
 
@@ -8,7 +7,6 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-
 
 app.use("", rotas.addUser);// getUser
 
@@ -18,6 +16,9 @@ app.use("", rotas.logout)// logout
 
 app.use("", rotas.login);// login
 
+app.use("", rotas.autenticarTokens); 
+
+app.use("", rotas.vagas);
 /*app.post("/token", (req, res)=>{
     const refreshToken = req.body.token
     if (refreshToken==null) return res.sendStatus(401)

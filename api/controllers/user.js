@@ -112,5 +112,89 @@ const updateUser = (req, res) =>{
     });
 };
 
+const autenticar = async (req, res) =>{
+    
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) return res.sendStatus(401)
+    
+    await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403)
+        req.user = user
+        const q = `SELECT pnome, snome, image FROM sistema.funcionario where email = '${user.user}';`
 
-module.exports = {getUser, getUsers, addUser, deleteUser, updateUser, login, logout, refresh}
+        try {
+                db.query(q, (err, data) => {
+                if (err) return res.send('Usuário ou senha inválidos' + err) ;
+                res.json({pnome: data[0]['pnome'], snome: data[0]['snome'], imageRef: data[0]['image']})
+            });
+        } catch{
+            res.send("Deu erro!")
+        }
+
+    })
+
+    
+};
+
+
+const showAllVacancies = async (req, res) =>{
+
+    const s = saidaQ(req);
+
+    const q =`select pnome, especialidade, dia, turno, quantidade_vagas
+    from vagas
+    inner join medico
+    inner join especialidade
+    on vagas.fk_Medico_id_Medico = medico.id_Medico and medico.id_Medico = especialidade.id_especialidade;`
+
+    const q2 = `select pnome, especialidade, dia, turno, quantidade_vagas
+    from vagas
+    inner join medico
+    inner join especialidade
+    on vagas.fk_Medico_id_Medico = medico.id_Medico and medico.id_Medico = especialidade.id_especialidade 
+    and especialidade.especialidade = "${req.body.especialidade}"
+    and medico.pnome = "${req.body.nome}";`
+
+    try{
+        await db.query(s, (err, data) =>{
+            if (err) return res.send(err)
+            res.json(data)
+        });
+    } catch{
+        res.send("Deu erro!")
+    }
+};
+
+
+function saidaQ(req){
+    
+    q = `select pnome, especialidade, dia, turno, quantidade_vagas
+        from vagas
+        inner join medico
+        inner join especialidade
+        on vagas.fk_Medico_id_Medico = medico.id_Medico and medico.id_Medico = especialidade.id_especialidade
+        and vagas.quantidade_vagas != 0`;
+    
+    if (req.body.especialidade!=null){
+        q += ` and especialidade.especialidade = "${req.body.especialidade}"`
+    }
+    if(req.body.nome!=null){
+        q += ` and medico.pnome = "${req.body.nome}"`
+    }
+    if(req.body.dia!= null){
+        q += ` and vagas.dia = "${req.body.dia}"`
+    }
+    if(req.body.turno!= null){
+        q += ` and vagas.turno = "${req.body.turno}"`
+    }
+
+    q+= ";"
+
+    console.log(q)
+    return q
+    };
+    
+
+
+module.exports = {getUser, getUsers, addUser, deleteUser, updateUser, login, logout, refresh, autenticar, showAllVacancies}

@@ -19,5 +19,15 @@ function dados(dd){
     
 }
 
+function saidaQ(req){
+let q =""
+
+if (!req.body.especialidade==null){
+    console.log(especialidade)
+}
+
+return q
+};
+
 dados({ email: 'email', senha: '0000' })
 //inverterData("25/09/2002")
