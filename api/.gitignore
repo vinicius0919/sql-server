@@ -1,3 +1,5 @@
 # Ignore a file with the specified name.
 # Scoped to the 'logs' subfolder.
 /node_modules
+
+.env

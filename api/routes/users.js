@@ -4,6 +4,9 @@ const control = require("../controllers/user");
 
 const router = express.Router();
 
+
+const cpf = router.get("/cpf", control.getByCPF);
+
 const getUser = router.get("/getuser", f.autenticarTokens, control.getUser);
 
 const addUser = router.post("/add",  f.autenticarTokens, control.addUser)
@@ -24,4 +27,4 @@ const logout = router.delete("/logout", control.logout)
 
 const vagas = router.get("/vagas", control.showAllVacancies)
 
-module.exports = {getUser, addUser, getUsers, updateUser, deleteUser, login, logout, refresh, autenticarTokens, vagas}
+module.exports = {getUser, addUser, getUsers, updateUser, deleteUser, login, logout, refresh, autenticarTokens, vagas, cpf}
