@@ -2,19 +2,16 @@ const axios = require("axios").default;
 const dialogflow = require("dialogflow");
 
 // Variables
-const projectId = "chatb--ljcw";
-const whatsAppToken = "WHATSAPP_TOKEN";
-const verifyToken = "VERIFY_TOKEN";
+const projectId = "consultabot-qedu";
+const whatsAppToken = "EAAHV5TgwYToBAAKyzwk0ft8UlwMpDihgpZBWQmSPDt8GGc50ZCbqkZCZB6YL4juz1u01HX31303J0hFVP4ZCxY6AHJnXIVFZCU8yOJDPeHDyPr0haz9ZBuEtJM6PJPhAyTIdZBFZAgd9ZB5007gTaac2BBgcrdXDg5gelOMtyBNVxWFXkG9tmGkNKANC87p2tgJj2koEjUpmw7NAZDZD";
+const verifyToken = "123";
 
 // Dialogflow
 const sessionClient = new dialogflow.SessionsClient();
 
 exports.cloudAPI = async (req, res) => {
   // VERIFICATION
-  console.log(req.body)
-  res.send("DEU CERTO")
-}
-/*
+
   let mode = req.query["hub.mode"];
   let token = req.query["hub.verify_token"];
   let challenge = req.query["hub.challenge"];
@@ -40,9 +37,11 @@ exports.cloudAPI = async (req, res) => {
       let to = req.body.entry[0].changes[0].value.metadata.phone_number_id;
       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
-      num = from.slice(0,4) + "9" + from.slice(4);
+      let num = from.slice(0,4) + "9" + from.slice(4);
+      console.log("to: ", to, "\n from: ", from, "\n num: ", num, "\n msg: ", msg_body)
+
       // Define Dialogflow Session
-      const sessionPath = sessionClient.sessionPath(projectId, from);
+      const sessionPath = sessionClient.sessionPath(projectId, num);
       const request = {
         session: sessionPath,
         queryInput: {
@@ -65,7 +64,7 @@ exports.cloudAPI = async (req, res) => {
               responseMsg = `${responseMsg}${text}\n`;
             }
           }
-          await sendMessage(to, from, responseMsg);
+          await sendMessage(to, num, responseMsg);
         }
       } catch (e) {
         console.log(e);
@@ -83,16 +82,15 @@ const sendMessage = async (to, num, msg_body) => {
   await axios({
     method: "POST", // Required, HTTP method, a string, e.g. POST, GET
     url:
-      "https://graph.facebook.com/v12.0/" +
+      "https://graph.facebook.com/v17.0/" +
       to +
       "/messages?access_token=" +
       whatsAppToken,
     data: {
       messaging_product: "whatsapp",
-      to: from,
+      to: num,
       text: { body: msg_body },
     },
     headers: { "Content-Type": "application/json" },
   });
 };
-*/

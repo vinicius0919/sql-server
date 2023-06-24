@@ -244,15 +244,16 @@ function getVagasbyEspecializacao(req, res){
 
         if (data.length > 0) {
 
-            let element = "Para essa especialidade temos a seguinte disponibilidade: \n";
+            let element = "Para essa especialidade temos a seguinte disponibilidade:\n---------------------------\n";
             for (i in data) {
                 let info = Object.values(data[i]);
                 for (let j = 0; j < info.length; j++) {
-                    element = `${element} *${texts[j]}* ${info[j]}                           \n`;
+                    element = `${element} ${texts[j]} ${info[j]}\n`;
                     console.log(element);
                 }
+                element += "---------------------------\n"
             }
-            requisicao['fulfillmentText'] = element + "                                  Selecione o dia da semana desejado";
+            requisicao['fulfillmentText'] = element + "\nSelecione o dia da semana desejado";
             return res.status(200).json(requisicao);
         }
     });
@@ -282,11 +283,11 @@ function getVagasbyDia(req, res){
 
         if (data.length > 0) {
 
-            let element = "Agora me diga, qual do(s) turno(s) que você deseja ser consultado?                                  \n";
+            let element = "Agora me diga, qual do(s) turno(s) que você deseja ser consultado?\n";
             for (i in data) {
                 let info = Object.values(data[i]);
                 for (let j = 0; j < info.length; j++) {
-                    element = `${element} ${info[j]}                           \n`;
+                    element = `${element} ${info[j]}\n`;
                     console.log(element);
                 }
             }
@@ -376,8 +377,7 @@ function turnosYes(req, res){
         
                 if (err) return res.send(err);
         
-                requisicao['fulfillmentText'] = `Perfeito, sua consulta foi agendada com sucesso! Obrigado por usar nossos serviços!
-                Não esqueça de chegar com 30 minutos de antecedência, para não perder sua vaga!`
+                requisicao['fulfillmentText'] = `Perfeito, sua consulta foi agendada com sucesso!\nObrigado por usar nossos serviços!\nNão esqueça de chegar com antecedência, para não perder sua vaga!`
                 res.send(requisicao)
             });
         });
