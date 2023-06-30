@@ -230,7 +230,9 @@ function getVagasbyEspecializacao(req, res){
     from vagas
     inner join medico
     inner join especialidade
-    on vagas.fk_Medico_id_Medico = medico.id_Medico and medico.id_Medico = especialidade.id_especialidade and especialidade.especialidade = "${especialidade}"
+    on vagas.fk_Medico_id_Medico = medico.id_Medico 
+    and medico.fk_Especialidade_id_especialidade = especialidade.id_especialidade 
+    and especialidade.especialidade = "${especialidade}"
     and vagas.quantidade_vagas != 0
     order by medico.id_Medico;`
     
@@ -238,11 +240,12 @@ function getVagasbyEspecializacao(req, res){
 
         const texts = [
             "Dia: ",
-            "Turno: "
+            "Turno: ",
+            "Data: "
         ];
         if (err) return res.send(err);
-
-        if (data.length > 0) {
+console.log(data)
+        if (data.length >= 0) {
 
             let element = "Para essa especialidade temos a seguinte disponibilidade:\n---------------------------\n";
             for (i in data) {
@@ -273,7 +276,7 @@ function getVagasbyDia(req, res){
     from vagas
     inner join medico
     inner join especialidade
-    on vagas.fk_Medico_id_Medico = medico.id_Medico and medico.id_Medico = especialidade.id_especialidade and vagas.dia = "${dia}" and especialidade.especialidade = "${especialidade}"
+    on vagas.fk_Medico_id_Medico = medico.id_Medico and medico.fk_Especialidade_id_especialidade  = especialidade.id_especialidade and vagas.dia = "${dia}" and especialidade.especialidade = "${especialidade}"
     and vagas.quantidade_vagas != 0
     order by medico.id_Medico;`
     
@@ -325,6 +328,7 @@ function turnosYes(req, res){
     const month = date.getMonth() + 1;
     const dataCompleta = `${year}-${month}-${day}`
 
+    
     //const numero = requisicao['queryResult']['outputContexts'][1]['name'].split("/")[4].replace('whatsapp:', '')
     const q = `select fk_Medico_id_Medico
     from vagas
@@ -386,8 +390,77 @@ function turnosYes(req, res){
 
 }
 
+function turnosY(req, res){
+    const date = new Date();
+
+
+    const requisicao = req.body;
+    const dia =  requisicao['queryResult']['outputContexts'][3]['parameters']['agenda']
+    const turno = requisicao['queryResult']['outputContexts'][3]['parameters']['turnos']
+    const especialidade = requisicao['queryResult']['outputContexts'][3]['parameters']['especializacao']
+    const cpf = requisicao["queryResult"]["outputContexts"][3]['parameters']['cpf.original']
+    const year = date.getFullYear();
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const dataCompleta = `${year}-${month}-${day}`
+
+    console.log(dia, especialidade, turno, dataCompleta);
+
+    //const numero = requisicao['queryResult']['outputContexts'][1]['name'].split("/")[4].replace('whatsapp:', '')
+    const querySelect = `
+    select id_vaga, fk_Medico_id_Medico
+from vagas
+inner join medico
+inner join especialidade
+on vagas.fk_Medico_id_Medico = medico.id_Medico 
+and medico.fk_Especialidade_id_especialidade = especialidade.id_especialidade 
+and vagas.dia = "${dia}" 
+and vagas.turno = "${turno}" 
+and especialidade.especialidade = "${especialidade}"
+and vagas.quantidade_vagas != 0
+order by vagas.data;`
+    
+    
+    db.query(querySelect, (err, data) => {
+        
+        if (err) {
+            requisicao['fulfillmentText'] = `Não conseguimos agendar sua consulta.\nVocê pode tentar de novo?\nSe o problema persistir, procure a unidade de saúde mais próxima, tá bom?`
+            return res.send(requisicao)
+        };
+        console.log(Object.values(data))
+        const idMedico = Object.values(data[0])[1];
+        const idVaga = Object.values(data[0])[0]
+        
+        console.log(idMedico, idVaga)
+        
+            
+            console.log(dia, especialidade, turno, dataCompleta, idMedico, idVaga);
+
+            const queryInsert = `insert into consulta(DataMarcacao, fk_Medico_id_Medico, fk_Paciente_CPF, fk_Vaga_id_vaga) values("${dataCompleta}", ${idMedico}, "${cpf}", ${idVaga});`
+            
+            db.query(queryInsert, (err, data) => {
+                if (err) return res.send(err);
+        
+            });
+
+
+            const queryUpdate = `update vagas
+            set quantidade_vagas = quantidade_vagas -1
+            where id_vaga = ${idVaga};`
+    
+            db.query(queryUpdate, (err, data) => {
+        
+                if (err) return res.send(err);
+        
+                requisicao['fulfillmentText'] = `Perfeito, sua consulta foi agendada com sucesso!\nObrigado por usar nossos serviços!\nNão esqueça de chegar com antecedência, para não perder sua vaga!`
+                res.send(requisicao)
+            });
+        });
+
+
+}
 
 module.exports = {getUser, getUsers, addUser, deleteUser,
     updateUser, login, logout, refresh, autenticar,
     showAllVacancies, getByCPF, getVagasbyEspecializacao,
-getVagasbyDia, turnos, turnosYes}
+getVagasbyDia, turnos, turnosY}

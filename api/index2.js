@@ -3,8 +3,10 @@ const dialogflow = require("dialogflow");
 
 // Variables
 const projectId = "consultabot-qedu";
-const whatsAppToken = "EAAHV5TgwYToBAAKyzwk0ft8UlwMpDihgpZBWQmSPDt8GGc50ZCbqkZCZB6YL4juz1u01HX31303J0hFVP4ZCxY6AHJnXIVFZCU8yOJDPeHDyPr0haz9ZBuEtJM6PJPhAyTIdZBFZAgd9ZB5007gTaac2BBgcrdXDg5gelOMtyBNVxWFXkG9tmGkNKANC87p2tgJj2koEjUpmw7NAZDZD";
+const whatsAppToken = "EAAOsV1mBz48BADnVMhzlZAKeNH1PDnMkMZB6cDjDB4ywLjJHd0rIPPClmzUdl6nhtUd0qLr1mYlJyLOan2KtDswUX0MdeZBiUMwvyOmumgl5LOMZA52mZCt2NZBAywoYoWb4ZCVBZA3Xmbw929DQT33VMAYVZAmm9K9pomP0ZBPz56DmZC5WCFgztPFY8T9VI8HTfMATybT7UmAEgZDZD";
 const verifyToken = "123";
+
+let response01 = "";
 
 // Dialogflow
 const sessionClient = new dialogflow.SessionsClient();
@@ -12,9 +14,12 @@ const sessionClient = new dialogflow.SessionsClient();
 exports.cloudAPI = async (req, res) => {
   // VERIFICATION
 
+  //console.log("REQ. QUERY ------->" , req.query)
+
   let mode = req.query["hub.mode"];
   let token = req.query["hub.verify_token"];
   let challenge = req.query["hub.challenge"];
+
   if (mode && token) {
     if (mode === "subscribe" && token === verifyToken) {
       res.status(200).send(challenge);
@@ -36,9 +41,9 @@ exports.cloudAPI = async (req, res) => {
       // Get Variables
       let to = req.body.entry[0].changes[0].value.metadata.phone_number_id;
       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
-      let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
+      let msg_body = "00000000000" //req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
       let num = from.slice(0,4) + "9" + from.slice(4);
-      console.log("to: ", to, "\n from: ", from, "\n num: ", num, "\n msg: ", msg_body)
+      //console.log("to: ", to, "\n from: ", from, "\n num: ", num, "\n msg: ", msg_body)
 
       // Define Dialogflow Session
       const sessionPath = sessionClient.sessionPath(projectId, num);
@@ -62,6 +67,7 @@ exports.cloudAPI = async (req, res) => {
           if (response.text) {
             for (const text of response.text.text) {
               responseMsg = `${responseMsg}${text}\n`;
+              response01 = responseMsg;
             }
           }
           await sendMessage(to, num, responseMsg);
@@ -94,3 +100,5 @@ const sendMessage = async (to, num, msg_body) => {
     headers: { "Content-Type": "application/json" },
   });
 };
+
+sendMessage("101336422764185", "5555996176555", response01)

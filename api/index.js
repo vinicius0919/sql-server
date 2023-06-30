@@ -1,6 +1,7 @@
 const rotas = require('./routes/users');
 const f = require("./controllers/user")
 
+const api = require('./df')
 
 const express = require("express");
 const cors = require("cors");
@@ -10,27 +11,26 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-//----------------------------------------------------
+//ROTA PRINCIPAL QUE FAZ A COMUNICAÇÃO DO CHATBOT COM O BANCO DE DADOS
 app.post("/dg", async (req, res)=>{
 
         //Recebendo a requisição do Dialogflow
         let flag = ""
         let requisicao = req.body
-        let fl = requisicao.queryResult.parameters
-
-        let parameters = Object.keys(fl)
-        //console.log(parameters, " ",fl)
-
+        //console.log(requisicao)
         
         try{
             flag = Object.keys(requisicao['queryResult']['parameters'])[0]
         }
         catch{
-            console.log(requisicao['queryResult']['action'])
+            //console.log(requisicao['queryResult']['action'])
             flag = requisicao['queryResult']['action']
         }
-        console.log("FLAG: " +flag)
+        //console.log("FLAG: " +flag)
         
+
+
+
         if(flag == "cpf"){
             //const cpf = requisicao['queryResult']['parameters']["cpf"]
             await f.getByCPF(req, res)
@@ -47,25 +47,37 @@ app.post("/dg", async (req, res)=>{
         else if(flag== "turnos"){
             await f.turnos(req,res)
         }
-        else {
-            await f.turnosYes(req, res)
+        else if (requisicao['queryResult']['action'] == "turnos.turnos-yes"){
+            await f.turnosY(req, res)
         }
         
 });
+//
+//app.post("/w", (req, res)=>{
+//    return file.cloudAPI(req, res)
+//})
 
 
 
 
 
-
-
-
+app.all("/wpp", async (req, res)=>{
+    //let queryText = "Oi";
+    //let num = "5555996176555";
+    try {
+        const resposta = await api.detectIntent(req, res);
+        
+    } catch (error) {
+        console.log(error)
+    }
+    
+    
+});
 
 
 
 //------------------------------------------------------------
 
-app.use("", rotas.cpf)
 app.use("", rotas.addUser);// getUser
 
 app.use("", rotas.getUsers);// getUser
