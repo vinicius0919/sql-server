@@ -37,6 +37,9 @@ app.post("/dg", async (req, res)=>{
         else if(requisicao.queryResult.intent.displayName == "turno"){
             await f.turnos(req,res)
         }
+        else if(requisicao.queryResult.intent.displayName == "Agendar"){
+            await f.exibirEspecialidades(req,res)
+        }
         else if (requisicao['queryResult']['action'] == "turno.turno-yes"){
             await f.turnosY(req, res)
         }

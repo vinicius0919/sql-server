@@ -220,13 +220,63 @@ function getByCPF(req, res){
     });
 
 }
+
+function exibirEspecialidades(req, res){
+    const requisicao = req.body;
+    const q = `select DISTINCT  especialidade, dia, turno, date_format(dataVaga,'%d/%m/%y') as dataConsulta
+    from vagas
+    inner join medico
+    inner join especialidade
+    on vagas.fk_Medico_id_Medico = medico.id_Medico 
+    and medico.fk_Especialidade_id_especialidade = especialidade.id_especialidade 
+    and vagas.quantidade_vagas > 0
+    order by dataVaga ASC, turno ="manhã" desc;`
+
+    let element = []
+    array = []
+    db.query(q, (err, data) => {
+        if(err){
+            requisicao['fulfillmentText'] = "Houve um problema de conexão, sentimos muito";
+            return res.json(requisicao);
+        }
+        const texts = [
+            "especialidade: ",
+            'dia: ',
+            "Turno: ",
+            "Data: "
+        ];
+        
+        for (i in data) {
+            let info = Object.values(data[i]);
+                    for (let j = 0; j < info.length; j++) {
+                            element.push(info[j])
+                        }
+                        let dic = {
+                            especialidade: element[0],
+                            dia: element[1],
+                            Turno: element[2],
+                            Data: element[3]
+                        }
+                        array.push(dic)
+                    }
+                    console.log(array)
+
+            //elemento = (info[0])
+            //console.log(Object.values(elemento))
+            requisicao['fulfillmentMessages'] = (array)
+            //requisicao['fulfillmentText'] = "Qual a especialidade desejada?"
+            return res.status(200).json(requisicao)
+       
+    });
+
+}
+
 //1) VERFICAR DISPONIBILIDADE DO MÉDICO
 function getVagasbyEspecializacao(req, res){
     const requisicao = req.body;
-    console.log("Entrou aqui", requisicao.queryResult.parameters.especializacao)
     const especialidade = requisicao.queryResult.parameters.especializacao
 
-    const q = `select dia, turno, date_format(dataVaga,'%d/%m/%y')
+    const q = `select dia, turno, date_format(dataVaga,'%d/%m/%y') as dataConsulta
     from vagas
     inner join medico
     inner join especialidade
@@ -238,25 +288,27 @@ function getVagasbyEspecializacao(req, res){
     
     db.query(q, (err, data) => {
 
-        const texts = [
-            "Dia: ",
-            "Turno: ",
-            "Data: "
-        ];
+        //const texts = [
+        //    "Dia: ",
+        //    "Turno: ",
+        //    "Data: "
+        //];
         if (err) return res.send(err);
-console.log(data)
+        let info = Object.values(data);
+        console.log(info)
         if (data.length >= 0) {
-
-            let element = "Para essa especialidade temos a seguinte disponibilidade:\n---------------------------\n";
-            for (i in data) {
-                let info = Object.values(data[i]);
-                for (let j = 0; j < info.length; j++) {
-                    element = `${element} ${texts[j]} ${info[j]}\n`;
-                    console.log(element);
-                }
-                element += "---------------------------\n"
-            }
-            requisicao['fulfillmentText'] = element + "\nSelecione o dia da semana desejado";
+            
+            let element = "Para essa especialidade temos a seguinte disponibilidade:\n";
+            //for (i in data) {
+                //    let info = Object.values(data[i]);
+                //    for (let j = 0; j < info.length; j++) {
+                    //        element = `${element} ${texts[j]} ${info[j]}\n`;
+                    //        console.log(element);
+                    //    }
+                    //    element += "---------------------------\n"
+                    //}
+            requisicao.queryResult.fulfillmentMessages = ({info})
+            requisicao['fulfillmentText'] = element + "Selecione o dia da semana desejado";
             return res.status(200).json(requisicao);
         }
     });
@@ -432,7 +484,7 @@ try {
     if((dia && especialidade && turno && dataCompleta)!= ""){
 
         
-        res.send(dia+ especialidade+ turno+ dataCompleta);
+       console.log(dia+ especialidade+ turno+ dataCompleta);
         //const numero = requisicao['queryResult']['outputContexts'][1]['name'].split("/")[4].replace('whatsapp:', '')
         const querySelect = `
         select id_vaga, fk_Medico_id_Medico
@@ -505,4 +557,4 @@ try {
 module.exports = {getUser, getUsers, addUser, deleteUser,
     updateUser, login, logout, refresh, autenticar,
     showAllVacancies, getByCPF, getVagasbyEspecializacao,
-getVagasbyDia, turnos, turnosY}
+getVagasbyDia, turnos, turnosY, exibirEspecialidades}
