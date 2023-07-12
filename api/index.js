@@ -1,5 +1,5 @@
 const rotas = require('./routes/users');
-const f = require("./controllers/user")
+const f = require("./controllers/chatapp")
 
 const api = require('./df')
 
@@ -21,11 +21,11 @@ app.post("/dg", async (req, res)=>{
 
 
 
-        //if(flag == "cpf"){
-        //    //const cpf = requisicao['queryResult']['parameters']["cpf"]
-        //    await f.getByCPF(req, res)
-        //    
-        //}
+        if(requisicao.queryResult.intent.displayName == "confirmar"){
+            //const cpf = requisicao['queryResult']['parameters']["cpf"]
+            await f.confirmar(req, res)
+            
+        }
         if (requisicao.queryResult.intent.displayName == "especialidade"){
             await f.getVagasbyEspecializacao(req, res)
             //console.log("Especialidade a seguir:" + req.body.queryResult.parameters.especializacao)
@@ -63,7 +63,7 @@ app.all("/wpp", async (req, res)=>{
 
 
 //------------------------------------------------------------
-
+/*
 app.use("", rotas.addUser);// getUser
 
 app.use("", rotas.getUsers);// getUser

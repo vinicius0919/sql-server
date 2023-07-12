@@ -7,8 +7,8 @@ const axios = require("axios").default;
 const CREDENTIALS = require('./keys')
 
 
-const whatsAppToken = "EAAHV5TgwYToBACsikjoUkphqJznrICHXiHU3yxW7CI758YKIhiiBo9ZBqupMib9ILyrWuhRWRVJvlkZBuNjcK67iJH44wpupgkRTcdZAWaMUGzNogVVCYLjYof7pftuDLtztZC1g2GzRPTztJfVgZCIxRU5Jem3l3QOnWL8WkYb1kEMmvLypIvozO58KLw1pvu3V3EgDmOQZDZD";
-const verifyToken = "123";
+//const whatsAppToken = "EAAHV5TgwYToBACsikjoUkphqJznrICHXiHU3yxW7CI758YKIhiiBo9ZBqupMib9ILyrWuhRWRVJvlkZBuNjcK67iJH44wpupgkRTcdZAWaMUGzNogVVCYLjYof7pftuDLtztZC1g2GzRPTztJfVgZCIxRU5Jem3l3QOnWL8WkYb1kEMmvLypIvozO58KLw1pvu3V3EgDmOQZDZD";
+//const verifyToken = "123";
 
 
 

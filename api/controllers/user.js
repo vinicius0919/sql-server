@@ -223,60 +223,53 @@ function getByCPF(req, res){
 
 function exibirEspecialidades(req, res){
     const requisicao = req.body;
-    const q = `select DISTINCT  especialidade, dia, turno, date_format(dataVaga,'%d/%m/%y') as dataConsulta
-    from vagas
-    inner join medico
-    inner join especialidade
-    on vagas.fk_Medico_id_Medico = medico.id_Medico 
-    and medico.fk_Especialidade_id_especialidade = especialidade.id_especialidade 
-    and vagas.quantidade_vagas > 0
-    order by dataVaga ASC, turno ="manhã" desc;`
+    
+    
+      
+      
+      const q = `select DISTINCT  especialidade
+      from vagas
+      inner join medico
+      inner join especialidade
+      on vagas.fk_Medico_id_Medico = medico.id_Medico 
+      and medico.fk_Especialidade_id_especialidade = especialidade.id_especialidade 
+      and vagas.quantidade_vagas > 0
+      order by dataVaga ASC, turno ="manhã" desc;`
+      
 
-    let element = []
-    array = []
-    db.query(q, (err, data) => {
-        if(err){
-            requisicao['fulfillmentText'] = "Houve um problema de conexão, sentimos muito";
-            return res.json(requisicao);
-        }
-        const texts = [
-            "especialidade: ",
-            'dia: ',
-            "Turno: ",
-            "Data: "
-        ];
-        
-        for (i in data) {
-            let info = Object.values(data[i]);
-                    for (let j = 0; j < info.length; j++) {
-                            element.push(info[j])
+      db.query(q, (err, data) => {
+          if(err){
+              requisicao['fulfillmentText'] = "Houve um problema de conexão, sentimos muito";
+              return res.json(requisicao);
+            }
+            let info = Object.values(data);
+            console.log(info)
+            if (data.length >= 0) {
+                
+                let element = "Temos as seguintes especialidades com vagas: \n";
+                for (i in data) {
+                        let info = Object.values(data[i]);
+                        for (let j = 0; j < info.length; j++) {
+                                element = `${element}${info[j]}\n`;
+                            }
                         }
-                        let dic = {
-                            especialidade: element[0],
-                            dia: element[1],
-                            Turno: element[2],
-                            Data: element[3]
-                        }
-                        array.push(dic)
-                    }
-                    console.log(array)
+                console.log(element);
+                requisicao['fulfillmentText'] = element + "\nSelecione a especialidade preferida";
+                return res.status(200).json(requisicao);
+            }
+        });
 
-            //elemento = (info[0])
-            //console.log(Object.values(elemento))
-            requisicao['fulfillmentMessages'] = (array)
-            //requisicao['fulfillmentText'] = "Qual a especialidade desejada?"
-            return res.status(200).json(requisicao)
+        //reqs[0].text.text.push(array)
        
-    });
-
-}
-
+        
+    }
+    
 //1) VERFICAR DISPONIBILIDADE DO MÉDICO
 function getVagasbyEspecializacao(req, res){
     const requisicao = req.body;
     const especialidade = requisicao.queryResult.parameters.especializacao
 
-    const q = `select dia, turno, date_format(dataVaga,'%d/%m/%y') as dataConsulta
+    const q = `select DISTINCT dia, turno, date_format(dataVaga,'%d/%m/%y') as dataConsulta
     from vagas
     inner join medico
     inner join especialidade
@@ -288,26 +281,25 @@ function getVagasbyEspecializacao(req, res){
     
     db.query(q, (err, data) => {
 
-        //const texts = [
-        //    "Dia: ",
-        //    "Turno: ",
-        //    "Data: "
-        //];
+        const texts = [
+            "Dia: ",
+            "Turno: ",
+            "Data: "
+        ];
         if (err) return res.send(err);
         let info = Object.values(data);
         console.log(info)
         if (data.length >= 0) {
             
             let element = "Para essa especialidade temos a seguinte disponibilidade:\n";
-            //for (i in data) {
-                //    let info = Object.values(data[i]);
-                //    for (let j = 0; j < info.length; j++) {
-                    //        element = `${element} ${texts[j]} ${info[j]}\n`;
-                    //        console.log(element);
-                    //    }
-                    //    element += "---------------------------\n"
-                    //}
-            requisicao.queryResult.fulfillmentMessages = ({info})
+            for (i in data) {
+                    let info = Object.values(data[i]);
+                    for (let j = 0; j < info.length; j++) {
+                            element = `${element} ${texts[j]} ${info[j]}\n`;
+                        }
+                        element += "\n"
+                    }
+            console.log(element);
             requisicao['fulfillmentText'] = element + "Selecione o dia da semana desejado";
             return res.status(200).json(requisicao);
         }
@@ -351,7 +343,6 @@ function getVagasbyDia(req, res){
             let element = "Agora me diga, qual do(s) turno(s) que você deseja ser consultado?\n ________________________________\n";
             for (i in data) {
                 let info = Object.values(data[i]);
-                element += `\n${count})`;
                 for (let j = 0; j < info.length; j++) {
                     element = `${element} ${texts[j]} ${info[j]} `;
                     console.log(element);
@@ -369,8 +360,7 @@ function getVagasbyDia(req, res){
 
 function turnos(req, res){
     const requisicao = req.body;
-
-    const medico = requisicao.queryResult.outputContexts[1].parameters.especializacao
+    const medico = requisicao.queryResult.outputContexts[0].parameters.especializacao
     const dia = requisicao.queryResult.outputContexts[1].parameters.agenda
     const turno = requisicao.queryResult.outputContexts[1].parameters.turnos
     console.log(medico, dia, turno)
@@ -400,7 +390,7 @@ function turnosYes(req, res){
     from vagas
     inner join medico
     inner join especialidade
-    on vagas.fk_Medico_id_Medico = medico.id_Medico and medico.id_Medico = especialidade.id_especialidade and vagas.dia = "${dia}" and vagas.turno = "${turno}" and especialidade.especialidade = "${especialidade}"
+    on vagas.fk_Medico_id_Medico = medico.id_Medico and medico.id_Medico = especialidade.id_especialidade and vagas.dia = "${dia}" and vagas.turno = "${turno}" and especialidade.especialidade = "${medico}"
     and vagas.quantidade_vagas != 0
     order by medico.id_Medico;`
     
@@ -469,22 +459,21 @@ try {
     dia =  requisicao.queryResult.outputContexts[1].parameters.agenda
     turno = requisicao.queryResult.outputContexts[1].parameters.turnos
     cpf = "05422932264"
-    
 } catch (error) {
     requisicao.fulfillmentText = `Houve algum problema com os dados selecionados.\nPode repetir o processo do começo, por favor?`
-    res.send(requisicao)
+    res.send(error)
 }
     const year = date.getFullYear();
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const dataCompleta = `${year}-${month}-${day}`
-    requisicao.queryResult.outputContexts[1].parameters = {}
-    console.log("REQUISIÇAO:");
 
-    if((dia && especialidade && turno && dataCompleta)!= ""){
+
+    if((dia && especialidade && turno && dataCompleta)!= undefined){
 
         
        console.log(dia+ especialidade+ turno+ dataCompleta);
+
         //const numero = requisicao['queryResult']['outputContexts'][1]['name'].split("/")[4].replace('whatsapp:', '')
         const querySelect = `
         select id_vaga, fk_Medico_id_Medico
@@ -501,10 +490,8 @@ try {
         
         
         db.query(querySelect, (err, data) => {
-            
             if (err) {
-                requisicao['fulfillmentText'] = `Não conseguimos agendar sua consulta.\nVocê pode tentar de novo?\nSe o problema persistir, procure a unidade de saúde mais próxima, tá bom?`
-                return res.send(requisicao)
+                return res.send(err)
             };
             console.log(Object.values(data))
             const idMedico = Object.values(data[0])[1];
@@ -512,28 +499,38 @@ try {
             
             console.log(idMedico, idVaga)
             
-            const queryVerify = `select * from consulta
-            where 
-            fk_Paciente_CPF = ${cpf}
-            and fk_Medico_id_Medico = ${idMedico}
-            and fk_Vaga_id_vaga = ${idVaga}
-            and DataMarcacao = ${dataCompleta};`
-                
+            
+            const queryVerify = `select statusc from consulta
+            join especialidade
+            join medico
+            on 
+            fk_Paciente_CPF = "${cpf}"
+            and medico.id_Medico = consulta.fk_Medico_id_Medico
+            and medico.fk_Especialidade_id_especialidade = especialidade.id_especialidade
+            and especialidade.especialidade = "${especialidade}"
+            and statusc = 1;`
+            
+            let verify = true
             db.query(queryVerify, (err, data) => {
                 if (err) return res.send(err);
-                
+                if (data[0]['statusc']==1){
+                    console.log(data[0]['statusc'])
+                    verify = false
+                    requisicao['fulfillmentText'] = `Você já possui uma consulta para essa especialidade`
+                    res.send(requisicao)
+                }
             });
-
-            if(true){
+            
+            console.log(verify)
+            if(verify==true){
                 console.log(dia, especialidade, turno, dataCompleta, idMedico, idVaga);
                 
-                const queryInsert = `insert into consulta(DataMarcacao, fk_Medico_id_Medico, fk_Paciente_CPF, fk_Vaga_id_vaga) values("${dataCompleta}", ${idMedico}, "${cpf}", ${idVaga});`
+                const queryInsert = `insert into consulta(DataMarcacao, fk_Medico_id_Medico, fk_Paciente_CPF, fk_Vaga_id_vaga, statusc) values("${dataCompleta}", ${idMedico}, "${cpf}", ${idVaga}, 1);`
                 
                 db.query(queryInsert, (err, data) => {
                     if (err) return res.send(err);
                     
                 });
-                
                 
                         const queryUpdate = `update vagas
                         set quantidade_vagas = quantidade_vagas -1
@@ -546,8 +543,12 @@ try {
                             requisicao['fulfillmentText'] = `Perfeito, sua consulta foi agendada com sucesso!\nObrigado por usar nossos serviços!\nNão esqueça de chegar com antecedência, para não perder sua vaga!`
                             res.send(requisicao)
                         });
-
-            }
+                        
+                    }else{
+                        requisicao['fulfillmentText'] = `Você já possui uma consulta para essa especialidade`
+                        res.send(requisicao)
+                    }
+                    
             
         });  
         
