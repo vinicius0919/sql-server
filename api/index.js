@@ -63,7 +63,7 @@ app.all("/wpp", async (req, res)=>{
 
 
 //------------------------------------------------------------
-/*
+
 app.use("", rotas.addUser);// getUser
 
 app.use("", rotas.getUsers);// getUser
@@ -75,7 +75,7 @@ app.use("", rotas.login);// login
 app.use("", rotas.autenticarTokens); 
 
 app.use("", rotas.vagas);
-/*app.post("/token", (req, res)=>{
+app.post("/token", (req, res)=>{
     const refreshToken = req.body.token
     if (refreshToken==null) return res.sendStatus(401)
     if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
@@ -85,7 +85,7 @@ app.use("", rotas.vagas);
         console.log("/token: ", user.user)
         res.json({accessToken: accessToken})
     });
-});*/
+});
 
 const port = 8080
     

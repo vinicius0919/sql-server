@@ -6,18 +6,17 @@ const jwt = require('jsonwebtoken')
 let refreshTokens = []
 
 const getUsers = (req, res) =>{
-    const q = "SELECT CPF, pNome, sNome, Endereco, Email, DATE_FORMAT(dataNascimento,'%d/%m/%Y') as dataNascimento FROM sistema.paciente;"
-
+    const q = "SELECT CPF, pNome, sNome, Endereco, Email, Telefone, DATE_FORMAT(dataNascimento,'%d/%m/%Y') as dataNascimento FROM sistema.paciente;"
     db.query(q, (err, data) => {
         if (err) return res.json(err);
-
+        console.log(data)
         return res.status(200).json(data);
     });
 };
 
 const getUser = (req, res) =>{
     const cpf = req.body.CPF;
-    const q = `SELECT CPF, pNome, sNome, Endereco, Email, DATE_FORMAT(dataNascimento,'%d/%m/%Y') as dataNascimento FROM sistema.paciente where CPF = '${cpf}';`
+    const q = `SELECT CPF, pNome, sNome, Endereco, Email, Telefone, DATE_FORMAT(dataNascimento,'%d/%m/%Y') as dataNascimento FROM sistema.paciente where CPF = '${cpf}';`
 
     db.query(q, (err, data) => {
         if (err) return res.json(err);
@@ -62,7 +61,6 @@ const refresh = (req, res) =>{
     });
 };
  const addUser = (req, res) =>{
-    console.log(req.body)
     const q = "insert into Paciente(CPF, pNome, sNome, dataNascimento, Endereco, Email, Telefone) values (?)";
 
     const values =[
@@ -82,15 +80,15 @@ const refresh = (req, res) =>{
 };
 
 const updateUser = (req, res) =>{
-    console.log(req.body)
-    const pnome = req.body.pNome;
-    const snome = req.body.sNome;
-    const datan = req.body.dataNascimento;
-    const end = req.body.Endereco;
-    const email = req.body.Email;
-    const tel =req.body.Telefone;
-    const cpf = req.body.CPF;
-    const q = `update sistema.paciente set pNome= '${pnome}', sNome = '${snome}', dataNascimento = '${datan}', Endereco = '${end}', Email = '${email}', Telefone = '${tel}' where cpf = '${cpf}'`;
+    console.log("ATUALIZARRRRRRR")
+    
+    const pnome = req.body.dados.firstName;
+    const snome = req.body.dados.lastName;
+    const end = req.body.dados.Adress;
+    const email = req.body.dados.email;
+    const tel =req.body.dados.phone;
+    const cpf = req.body.dados.cpf;
+    const q = `update sistema.paciente set pNome= '${pnome}', sNome = '${snome}', Endereco = '${end}', Email = '${email}', Telefone = '${tel}' where cpf = '${cpf}'`;
 
 
     db.query(q,(err) => {
@@ -98,6 +96,7 @@ const updateUser = (req, res) =>{
 
         return res.status(200).json("Usuário atualizado com sucesso");
     });
+    
 };
 
 
@@ -106,7 +105,7 @@ const updateUser = (req, res) =>{
 const deleteUser = (req, res) =>{
     console.log(req.body)
     const cpf = req.body.CPF;
-    const q = `delete from Paciente where cpf = '${cpf}'`;
+    const q = `delete from Paciente where CPF = '${cpf}'`;
     
     db.query(q,(err) => {
         if (err) return res.json(err);

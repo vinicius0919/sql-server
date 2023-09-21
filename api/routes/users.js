@@ -7,19 +7,19 @@ const router = express.Router();
 
 const cpf = router.get("/cpf", control.getByCPF);
 
-const getUser = router.get("/getuser", f.autenticarTokens, control.getUser);
+const getUser = router.get("/getuser", control.getUser);
 
 const addUser = router.post("/add",  f.autenticarTokens, control.addUser)
 
 const refresh = router.post("/token", control.refresh)
 
-const getUsers = router.get("/getusers", f.autenticarTokens, control.getUsers);
+const getUsers = router.post("/getusers", control.getUsers);
 
 const login = router.post("/login", control.login);
 
-const updateUser =router.put("/putusers", control.updateUser);
+const updateUser =router.post("/putusers", control.updateUser);
 
-const deleteUser = router.delete("/deleteusers", control.deleteUser);
+const deleteUser = router.post("/deleteuser", control.deleteUser);
 
 const autenticarTokens = router.get("/autenticar", control.autenticar)
 
